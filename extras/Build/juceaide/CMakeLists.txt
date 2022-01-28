@@ -54,36 +54,43 @@ else()
     unset(ENV{CC})
     unset(ENV{CXX})
 
-    message(STATUS "Configuring juceaide")
+    # Build intermediary tool juceaide only when doing native build.
+    # So a native build has to be configured prior to configuring the target build.
+    # https://cmake.org/cmake/help/book/mastering-cmake/chapter/Cross%20Compiling%20With%20CMake.html#running-executables-built-in-the-project
+    if(CMAKE_CROSSCOMPILING)
+        message(STATUS "Skip juceaide config and build when crosscompiling")
+    else()
+        message(STATUS "Configuring juceaide - native build")
+        # Looks like we're boostrapping, reinvoke CMake
 
-    # Looks like we're boostrapping, reinvoke CMake
-    execute_process(COMMAND "${CMAKE_COMMAND}"
-            "."
-            "-B${JUCE_BINARY_DIR}/tools"
-            "-G${CMAKE_GENERATOR}"
-            "-DCMAKE_BUILD_TYPE=Debug"
-            "-DJUCE_BUILD_HELPER_TOOLS=ON"
-            "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-        WORKING_DIRECTORY "${JUCE_SOURCE_DIR}"
-        OUTPUT_VARIABLE command_output
-        ERROR_VARIABLE command_output
-        RESULT_VARIABLE result_variable)
+        execute_process(COMMAND "${CMAKE_COMMAND}"
+                "."
+                "-B${JUCE_BINARY_DIR}/tools"
+                "-G${CMAKE_GENERATOR}"
+                "-DCMAKE_BUILD_TYPE=Debug"
+                "-DJUCE_BUILD_HELPER_TOOLS=ON"
+                "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+            WORKING_DIRECTORY "${JUCE_SOURCE_DIR}"
+            OUTPUT_VARIABLE command_output
+            ERROR_VARIABLE command_output
+            RESULT_VARIABLE result_variable)
 
-    if(result_variable)
-        message(FATAL_ERROR "Failed to configure juceaide\n${command_output}")
-    endif()
+        if(result_variable)
+            message(FATAL_ERROR "Failed to configure juceaide\n${command_output}")
+        endif()
 
-    message(STATUS "Building juceaide")
+        message(STATUS "Building juceaide - native build")
 
-    execute_process(COMMAND "${CMAKE_COMMAND}"
-            --build "${JUCE_BINARY_DIR}/tools"
-            --config Debug
-        OUTPUT_VARIABLE command_output
-        ERROR_VARIABLE command_output
-        RESULT_VARIABLE result_variable)
+        execute_process(COMMAND "${CMAKE_COMMAND}"
+                --build "${JUCE_BINARY_DIR}/tools"
+                --config Debug
+            OUTPUT_VARIABLE command_output
+            ERROR_VARIABLE command_output
+            RESULT_VARIABLE result_variable)
 
-    if(result_variable)
-        message(FATAL_ERROR "Failed to build juceaide\n${command_output}")
+        if(result_variable)
+            message(FATAL_ERROR "Failed to build juceaide\n${command_output}")
+        endif()
     endif()
 
     message(STATUS "Exporting juceaide")

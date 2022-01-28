@@ -2005,6 +2005,7 @@ Image XWindowSystem::createImage (bool isSemiTransparent, int width, int height,
    #if JUCE_USE_XSHM
     return Image (new XBitmapImage (argb ? Image::ARGB : Image::RGB,
    #else
+    ignoreUnused(argb);
     return Image (new XBitmapImage (Image::RGB,
    #endif
                                     (width + 31) & ~31,
@@ -2039,6 +2040,8 @@ void XWindowSystem::processPendingPaintsForWindow (::Window windowH)
         while (X11Symbols::getInstance()->xCheckTypedWindowEvent (display, windowH, shmCompletionEvent, &evt))
             removePendingPaintForWindow (windowH);
     }
+   #else
+    ignoreUnused(windowH);
    #endif
 }
 
@@ -2047,6 +2050,8 @@ int XWindowSystem::getNumPaintsPendingForWindow (::Window windowH)
    #if JUCE_USE_XSHM
     if (XSHMHelpers::isShmAvailable (display))
         return shmPaintsPendingMap[windowH];
+   #else
+    ignoreUnused(windowH);
    #endif
 
     return 0;
@@ -2057,6 +2062,8 @@ void XWindowSystem::addPendingPaintForWindow (::Window windowH)
    #if JUCE_USE_XSHM
     if (XSHMHelpers::isShmAvailable (display))
         ++shmPaintsPendingMap[windowH];
+   #else
+    ignoreUnused(windowH);
    #endif
 }
 
@@ -2065,6 +2072,8 @@ void XWindowSystem::removePendingPaintForWindow (::Window windowH)
    #if JUCE_USE_XSHM
     if (XSHMHelpers::isShmAvailable (display))
         --shmPaintsPendingMap[windowH];
+   #else
+    ignoreUnused(windowH);
    #endif
 }
 
